@@ -5,10 +5,14 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 from listeners import register_listeners
+from ai.rag import initialize_rag
 
 # Initialization
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 logging.basicConfig(level=logging.DEBUG)
+
+# Initialize RAG system
+initialize_rag()
 
 # Register Listeners
 register_listeners(app)

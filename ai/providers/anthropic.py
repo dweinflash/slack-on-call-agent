@@ -8,6 +8,8 @@ from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+from ..rag import retrieve_context
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -101,16 +103,40 @@ class AnthropicAPI(BaseAPIProvider):
             logger.error(f"Error initializing MCP: {e}")
 
     async def _generate_with_tools(self, prompt: str, system_content: str) -> str:
-        """Generate response with MCP tool support."""
+        """Generate response with MCP tool support and RAG context."""
         await self._initialize_mcp()
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
+
+        # Retrieve relevant context from RAG system
+        logger.info(f"Retrieving RAG context for prompt: {prompt[:100]}...")
+        rag_context = retrieve_context(prompt)
+        logger.info(f"RAG context retrieved: {len(rag_context)} characters")
+
+        # Inject RAG context into system prompt if available
+        if rag_context:
+            enhanced_system_content = f"""## Retrieved Knowledge Base Articles
+
+The following knowledge base articles may be relevant to the user's query:
+
+{rag_context}
+
+## Instructions
+
+{system_content}
+
+When answering the user's question, prioritize information from the retrieved knowledge base articles above. If the articles contain relevant information, use it to provide accurate, detailed answers. If the articles don't contain relevant information, you can answer based on your general knowledge."""
+            logger.info("Enhanced prompt with RAG context")
+        else:
+            logger.warning("No RAG context retrieved - responding without knowledge base")
+            enhanced_system_content = system_content
+
         messages = [{"role": "user", "content": prompt}]
 
         # Build API call parameters
         api_params = {
             "model": self.current_model,
-            "system": system_content,
+            "system": enhanced_system_content,
             "messages": messages,
             "max_tokens": self.MODELS[self.current_model]["max_tokens"],
         }

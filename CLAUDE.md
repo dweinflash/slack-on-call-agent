@@ -48,6 +48,23 @@ The FileStateStore system persists user preferences:
 - For channel mentions, retrieves up to 10 messages using `conversations.history`
 - Context is formatted as `"{user}: {text}"` and passed to the AI provider
 
+### RAG (Retrieval-Augmented Generation) System
+The RAG system enhances the Anthropic provider with knowledge base retrieval:
+- `ai/rag/` - RAG module for document indexing and retrieval
+- `ai/rag/rag_config.py` - Configuration constants (chunk size, top-k retrieval, etc.)
+- `ai/rag/document_loader.py` - Loads and chunks markdown documents from `data/docs/`
+- `ai/rag/vector_store.py` - Manages ChromaDB vector database and embeddings
+- `ai/rag/__init__.py` - Public API: `initialize_rag()` and `retrieve_context()`
+
+**How RAG works:**
+1. On app startup (`app.py`), `initialize_rag()` loads markdown files from `data/docs/`
+2. Documents are split into 1000-character chunks with 200-character overlap
+3. OpenAI embeddings (text-embedding-3-small) are generated and stored in ChromaDB
+4. When Anthropic provider receives a query, it retrieves the top 3 most relevant chunks
+5. Retrieved context is injected into the system prompt before generating a response
+
+**RAG is only active for the Anthropic provider.** OpenAI and Vertex AI providers work as before.
+
 ## Development Commands
 
 ### Setup
@@ -65,9 +82,12 @@ export SLACK_APP_TOKEN=<your-app-token>
 
 # Set at least one AI provider API key
 export ANTHROPIC_API_KEY=<your-api-key>
-export OPENAI_API_KEY=<your-api-key>
+export OPENAI_API_KEY=<your-api-key>  # Also required for RAG embeddings
 export VERTEX_AI_PROJECT_ID=<your-project-id>
 export VERTEX_AI_LOCATION=<location>
+
+# Note: OPENAI_API_KEY is required even if you're only using Anthropic,
+# because the RAG system uses OpenAI embeddings for document indexing
 ```
 
 ### Running the App
