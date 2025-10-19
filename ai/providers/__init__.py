@@ -48,6 +48,7 @@ def get_provider_response(
     context: Optional[List] = [],
     system_content=DEFAULT_SYSTEM_CONTENT,
     use_rag: bool = False,
+    use_mcp: bool = False,
 ) -> dict:
     """
     Get a response from the user's selected AI provider.
@@ -58,6 +59,7 @@ def get_provider_response(
         context: Optional conversation context
         system_content: System prompt to use
         use_rag: Whether to use RAG knowledge base retrieval (default: False)
+        use_mcp: Whether to use MCP tools (default: False)
 
     Returns:
         Dictionary containing:
@@ -75,16 +77,20 @@ def get_provider_response(
         provider = _get_provider(provider_name)
         provider.set_model(model_name)
 
-        logger.info(f"Provider: {provider_name}, Model: {model_name}, RAG requested: {use_rag}")
+        logger.info(f"Provider: {provider_name}, Model: {model_name}, RAG requested: {use_rag}, MCP requested: {use_mcp}")
 
-        # Pass use_rag flag to provider (only Anthropic supports it)
+        # Pass use_rag and use_mcp flags to provider (only Anthropic supports them)
         if hasattr(provider, 'generate_response') and provider_name.lower() == "anthropic":
             if use_rag:
                 logger.info("✓ RAG will be used (Anthropic provider)")
-            response = provider.generate_response(full_prompt, system_content, use_rag=use_rag)
+            if use_mcp:
+                logger.info("✓ MCP will be used (Anthropic provider)")
+            response = provider.generate_response(full_prompt, system_content, use_rag=use_rag, use_mcp=use_mcp)
         else:
             if use_rag:
                 logger.warning(f"⚠️  RAG requested but provider '{provider_name}' does not support RAG. Only Anthropic supports RAG.")
+            if use_mcp:
+                logger.warning(f"⚠️  MCP requested but provider '{provider_name}' does not support MCP. Only Anthropic supports MCP.")
             response = provider.generate_response(full_prompt, system_content)
 
         # Handle different response formats

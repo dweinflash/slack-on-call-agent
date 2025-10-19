@@ -4,10 +4,10 @@
             "command": "npx",
             "args": [
                 "-y",
-                "@github/github-mcp-server"
+                "@modelcontextprotocol/server-github"
             ],
             "env": {
-                "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+                "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
             }
         }
     }
