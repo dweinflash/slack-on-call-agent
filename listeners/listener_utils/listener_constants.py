@@ -11,4 +11,8 @@ A user has just joined this Slack channel.
 Please create a quick summary of the conversation in this channel to help them catch up.
 Don't use user IDs or names in your response.
 """
-DEFAULT_LOADING_TEXT = "Thinking..."
+
+# Loading messages with emojis
+DEFAULT_LOADING_TEXT = ":thought_balloon: Thinking..."
+RAG_LOADING_TEXT = ":books: Searching knowledge base..."
+ERROR_PREFIX = ":warning: Oops! Something went wrong"

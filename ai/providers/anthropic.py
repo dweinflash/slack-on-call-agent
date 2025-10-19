@@ -102,16 +102,25 @@ class AnthropicAPI(BaseAPIProvider):
         except Exception as e:
             logger.error(f"Error initializing MCP: {e}")
 
-    async def _generate_with_tools(self, prompt: str, system_content: str) -> str:
-        """Generate response with MCP tool support and RAG context."""
+    async def _generate_with_tools(self, prompt: str, system_content: str) -> dict:
+        """
+        Generate response with MCP tool support and RAG context.
+
+        Returns:
+            Dictionary containing:
+                - 'response': The AI-generated response text
+                - 'rag_sources': List of source metadata dicts (empty if no RAG used)
+        """
         await self._initialize_mcp()
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
 
         # Retrieve relevant context from RAG system
         logger.info(f"Retrieving RAG context for prompt: {prompt[:100]}...")
-        rag_context = retrieve_context(prompt)
-        logger.info(f"RAG context retrieved: {len(rag_context)} characters")
+        rag_result = retrieve_context(prompt)
+        rag_context = rag_result.get("context", "")
+        rag_sources = rag_result.get("sources", [])
+        logger.info(f"RAG context retrieved: {len(rag_context)} characters from {len(rag_sources)} sources")
 
         # Inject RAG context into system prompt if available
         if rag_context:
@@ -125,7 +134,21 @@ The following knowledge base articles may be relevant to the user's query:
 
 {system_content}
 
-When answering the user's question, prioritize information from the retrieved knowledge base articles above. If the articles contain relevant information, use it to provide accurate, detailed answers. If the articles don't contain relevant information, you can answer based on your general knowledge."""
+When answering the user's question about incidents, alerts, or issues:
+1. **Prioritize information from the retrieved knowledge base articles above**
+2. **Provide detailed, actionable resolution steps** - this is critical for incident response
+3. **Structure your response clearly** using:
+   - Brief explanation of what the issue is
+   - Step-by-step resolution instructions with specific actions
+   - Common causes if relevant
+   - What to check/verify
+4. **Use formatting** to make steps easy to follow (bullet points, numbered lists)
+5. **Be comprehensive** - include all necessary details from the knowledge base
+6. **Be direct and technical** - assume the user needs to resolve the issue now
+7. If the knowledge base articles contain resolution steps, **include them in full**
+8. Use a professional, helpful tone appropriate for incident response
+
+Remember: Users need complete resolution guidance to fix production issues. Provide thorough, step-by-step instructions."""
             logger.info("Enhanced prompt with RAG context")
         else:
             logger.warning("No RAG context retrieved - responding without knowledge base")
@@ -166,11 +189,25 @@ When answering the user's question, prioritize information from the retrieved kn
                     })
                     # Get final response
                     final_response = self.client.messages.create(**{**api_params, "messages": messages})
-                    return final_response.content[0].text
+                    return {
+                        "response": final_response.content[0].text,
+                        "rag_sources": rag_sources
+                    }
 
-        return response.content[0].text
+        return {
+            "response": response.content[0].text,
+            "rag_sources": rag_sources
+        }
 
-    def generate_response(self, prompt: str, system_content: str) -> str:
+    def generate_response(self, prompt: str, system_content: str) -> dict:
+        """
+        Generate a response to the user's prompt.
+
+        Returns:
+            Dictionary containing:
+                - 'response': The AI-generated response text
+                - 'rag_sources': List of source metadata dicts (empty if no RAG used)
+        """
         try:
             # Run async MCP tool support
             loop = asyncio.new_event_loop()

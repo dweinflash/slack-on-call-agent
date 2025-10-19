@@ -5,8 +5,15 @@ from slack_bolt import Say
 from ..listener_utils.listener_constants import (
     DEFAULT_LOADING_TEXT,
     MENTION_WITHOUT_TEXT,
+    ERROR_PREFIX,
 )
 from ..listener_utils.parse_conversation import parse_conversation
+from ..listener_utils.message_formatter import (
+    format_rag_response,
+    format_ai_response,
+    format_error_message,
+    format_simple_message,
+)
 
 """
 Handles the event when the app is mentioned in a Slack channel, retrieves the conversation context,
@@ -15,6 +22,7 @@ and generates an AI response if text is provided, otherwise sends a default resp
 
 
 def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: Say):
+    waiting_message = None
     try:
         channel_id = event.get("channel")
         thread_ts = event.get("thread_ts")
@@ -35,20 +43,35 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
 
         if text:
             waiting_message = say(text=DEFAULT_LOADING_TEXT, thread_ts=thread_ts)
-            response = get_provider_response(user_id, text, conversation_context)
+            result = get_provider_response(user_id, text, conversation_context)
+
+            # Extract response components
+            response_text = result.get("response", "")
+            rag_sources = result.get("rag_sources", [])
+            provider = result.get("provider", "")
+
+            # Format with Block Kit based on whether RAG was used
+            if rag_sources and provider.lower() == "anthropic":
+                blocks = format_rag_response(response_text, rag_sources)
+            else:
+                blocks = format_ai_response(response_text, response_type="general")
+
             client.chat_update(
-                channel=channel_id, ts=waiting_message["ts"], text=response
+                channel=channel_id,
+                ts=waiting_message["ts"],
+                text=response_text,  # Fallback text for notifications
+                blocks=blocks
             )
         else:
-            response = MENTION_WITHOUT_TEXT
-            client.chat_update(
-                channel=channel_id, ts=waiting_message["ts"], text=response
-            )
+            waiting_message = say(text=MENTION_WITHOUT_TEXT, thread_ts=thread_ts)
 
     except Exception as e:
         logger.error(e)
-        client.chat_update(
-            channel=channel_id,
-            ts=waiting_message["ts"],
-            text=f"Received an error from Bolty:\n{e}",
-        )
+        error_blocks = format_error_message(str(e))
+        if waiting_message:
+            client.chat_update(
+                channel=channel_id,
+                ts=waiting_message["ts"],
+                text=f"{ERROR_PREFIX}\n{e}",  # Fallback text
+                blocks=error_blocks
+            )

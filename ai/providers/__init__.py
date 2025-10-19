@@ -47,7 +47,16 @@ def get_provider_response(
     prompt: str,
     context: Optional[List] = [],
     system_content=DEFAULT_SYSTEM_CONTENT,
-):
+) -> dict:
+    """
+    Get a response from the user's selected AI provider.
+
+    Returns:
+        Dictionary containing:
+            - 'response': The AI-generated response text
+            - 'rag_sources': List of source metadata dicts (empty if no RAG used)
+            - 'provider': The provider name used
+    """
     formatted_context = "\n".join([f"{msg['user']}: {msg['text']}" for msg in context])
     full_prompt = f"Prompt: {prompt}\nContext: {formatted_context}"
     try:
@@ -55,6 +64,20 @@ def get_provider_response(
         provider = _get_provider(provider_name)
         provider.set_model(model_name)
         response = provider.generate_response(full_prompt, system_content)
-        return response
+
+        # Handle different response formats
+        # Anthropic returns dict with 'response' and 'rag_sources'
+        # Other providers return string
+        if isinstance(response, dict):
+            return {
+                **response,
+                "provider": provider_name
+            }
+        else:
+            return {
+                "response": response,
+                "rag_sources": [],
+                "provider": provider_name
+            }
     except Exception as e:
         raise e

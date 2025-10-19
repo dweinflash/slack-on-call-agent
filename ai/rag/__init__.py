@@ -28,7 +28,7 @@ def initialize_rag():
     logger.info("RAG system initialization complete")
 
 
-def retrieve_context(query: str) -> str:
+def retrieve_context(query: str) -> dict:
     """
     Retrieve relevant document chunks for a given query.
 
@@ -36,22 +36,32 @@ def retrieve_context(query: str) -> str:
         query: The user's query text
 
     Returns:
-        Formatted string containing retrieved document chunks,
-        or empty string if no relevant documents found
+        Dictionary containing:
+            - 'context': Formatted string containing retrieved document chunks
+            - 'sources': List of source metadata dicts with 'filename' keys
+        Returns empty dict if no relevant documents found
     """
     vector_store = get_vector_store()
     documents = vector_store.retrieve(query)
 
     if not documents:
-        return ""
+        return {"context": "", "sources": []}
 
     # Format retrieved documents
     context_parts = []
+    sources = []
+    seen_sources = set()
+
     for i, doc in enumerate(documents, 1):
         source = doc.metadata.get("source", "Unknown")
         # Extract just the filename from the full path
         filename = source.split("/")[-1] if "/" in source else source
         context_parts.append(f"### Document {i}: {filename}\n{doc.page_content}")
 
+        # Add unique sources
+        if filename not in seen_sources:
+            sources.append({"filename": filename})
+            seen_sources.add(filename)
+
     formatted_context = "\n\n".join(context_parts)
-    return formatted_context
+    return {"context": formatted_context, "sources": sources}
