@@ -84,7 +84,7 @@ class AnthropicAPI(BaseAPIProvider):
             logger.error(f"Error connecting to {server_name} MCP server: {e}")
 
     async def _initialize_mcp(self):
-        """Initialize MCP connection to filesystem server."""
+        """Initialize MCP connections to configured servers."""
         if self.mcp_initialized:
             return
 
@@ -93,12 +93,13 @@ class AnthropicAPI(BaseAPIProvider):
             with open("server_config.json", "r") as file:
                 data = json.load(file)
 
-            # Connect to filesystem server
+            # Connect to all configured MCP servers
             servers = data.get("mcpServers", {})
-            if "filesystem" in servers:
-                await self._connect_to_mcp_server("filesystem", servers["filesystem"])
+            for server_name, server_config in servers.items():
+                await self._connect_to_mcp_server(server_name, server_config)
 
             self.mcp_initialized = True
+            logger.info(f"MCP initialized with {len(self.available_tools)} tools")
         except Exception as e:
             logger.error(f"Error initializing MCP: {e}")
 
@@ -111,7 +112,9 @@ class AnthropicAPI(BaseAPIProvider):
                 - 'response': The AI-generated response text
                 - 'rag_sources': List of source metadata dicts (empty if no RAG used)
         """
-        await self._initialize_mcp()
+        
+        # Temporarily disable MCP tool support
+        # await self._initialize_mcp()
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
 

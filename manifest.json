@@ -21,6 +21,18 @@
                 "command": "/ask-bolty",
                 "description": "Interact with Bolty.",
                 "should_escape": false
+            },
+            {
+                "command": "/code",
+                "description": "Ask code analysis and system design questions",
+                "usage_hint": "/code explain the authentication flow",
+                "should_escape": false
+            },
+            {
+                "command": "/incident",
+                "description": "Get incident resolution steps from knowledge base",
+                "usage_hint": "/incident kafka backlog is growing",
+                "should_escape": false
             }
         ]
     },
