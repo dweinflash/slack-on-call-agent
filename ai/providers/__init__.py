@@ -47,9 +47,17 @@ def get_provider_response(
     prompt: str,
     context: Optional[List] = [],
     system_content=DEFAULT_SYSTEM_CONTENT,
+    use_rag: bool = False,
 ) -> dict:
     """
     Get a response from the user's selected AI provider.
+
+    Args:
+        user_id: The Slack user ID
+        prompt: The user's prompt/question
+        context: Optional conversation context
+        system_content: System prompt to use
+        use_rag: Whether to use RAG knowledge base retrieval (default: False)
 
     Returns:
         Dictionary containing:
@@ -57,13 +65,27 @@ def get_provider_response(
             - 'rag_sources': List of source metadata dicts (empty if no RAG used)
             - 'provider': The provider name used
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     formatted_context = "\n".join([f"{msg['user']}: {msg['text']}" for msg in context])
     full_prompt = f"Prompt: {prompt}\nContext: {formatted_context}"
     try:
         provider_name, model_name = get_user_state(user_id, False)
         provider = _get_provider(provider_name)
         provider.set_model(model_name)
-        response = provider.generate_response(full_prompt, system_content)
+
+        logger.info(f"Provider: {provider_name}, Model: {model_name}, RAG requested: {use_rag}")
+
+        # Pass use_rag flag to provider (only Anthropic supports it)
+        if hasattr(provider, 'generate_response') and provider_name.lower() == "anthropic":
+            if use_rag:
+                logger.info("✓ RAG will be used (Anthropic provider)")
+            response = provider.generate_response(full_prompt, system_content, use_rag=use_rag)
+        else:
+            if use_rag:
+                logger.warning(f"⚠️  RAG requested but provider '{provider_name}' does not support RAG. Only Anthropic supports RAG.")
+            response = provider.generate_response(full_prompt, system_content)
 
         # Handle different response formats
         # Anthropic returns dict with 'response' and 'rag_sources'

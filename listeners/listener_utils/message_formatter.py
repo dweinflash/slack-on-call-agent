@@ -81,39 +81,63 @@ def shorten_response(text: str, max_length: int = 2500) -> tuple[str, bool]:
 
 def format_rag_sources(sources: List[Dict[str, str]]) -> List[Dict[str, Any]]:
     """
-    Format RAG source citations as Block Kit blocks.
+    Format RAG source citations as Block Kit blocks with clickable buttons.
 
     Args:
-        sources: List of source metadata dicts with 'filename' and optionally 'title'
+        sources: List of source metadata dicts with 'filename' and 'url'
 
     Returns:
-        List of Block Kit blocks for displaying sources
+        List of Block Kit blocks for displaying sources with View Article buttons
     """
     if not sources:
         return []
 
-    # Create bullet list of sources
-    source_items = []
+    blocks = [{"type": "divider"}]
+
+    # Header for referenced articles
+    blocks.append({
+        "type": "context",
+        "elements": [
+            {
+                "type": "mrkdwn",
+                "text": ":page_facing_up: *Referenced Knowledge Base Articles*"
+            }
+        ]
+    })
+
+    # Add each source with a clickable button
     for source in sources:
         filename = source.get('filename', 'Unknown')
+        url = source.get('url', '')
+
         # Clean up filename - remove number prefix and extension
         clean_name = filename.replace('.md', '').replace('209731_', '')
-        source_items.append(f"• {clean_name}")
 
-    sources_text = "\n".join(source_items)
-
-    return [
-        {"type": "divider"},
-        {
-            "type": "context",
-            "elements": [
-                {
-                    "type": "mrkdwn",
-                    "text": f":page_facing_up: *Referenced Knowledge Base Articles*\n{sources_text}"
-                }
-            ]
+        # Create section with article name and button
+        section_block = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"• *{clean_name}*"
+            }
         }
-    ]
+
+        # Add button if URL is available
+        if url:
+            section_block["accessory"] = {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": "📄 View Article",
+                    "emoji": True
+                },
+                "url": url,
+                "style": "primary"
+            }
+
+        blocks.append(section_block)
+
+    return blocks
 
 
 def format_rag_response(

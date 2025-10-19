@@ -28,7 +28,7 @@ def handle_summary_function_callback(
         conversation = parse_conversation(history)
 
         summary = get_provider_response(
-            user_context["id"], SUMMARIZE_CHANNEL_WORKFLOW, conversation
+            user_context["id"], SUMMARIZE_CHANNEL_WORKFLOW, conversation, use_rag=False
         )
 
         complete({"user_context": user_context, "response": summary})

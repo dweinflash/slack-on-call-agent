@@ -58,9 +58,9 @@ def code_callback(
                 blocks=initial_blocks
             )
 
-            # Get AI response with code analysis system prompt (no RAG)
+            # Get AI response with code analysis system prompt (disable RAG for code queries)
             result = get_provider_response(
-                user_id, prompt, context=[], system_content=CODE_ANALYSIS_SYSTEM_CONTENT
+                user_id, prompt, context=[], system_content=CODE_ANALYSIS_SYSTEM_CONTENT, use_rag=False
             )
 
             # Extract response components

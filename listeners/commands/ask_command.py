@@ -31,8 +31,8 @@ def ask_callback(
                 text="Looks like you didn't provide a prompt. Try again.",
             )
         else:
-            # Get AI response
-            result = get_provider_response(user_id, prompt)
+            # Get AI response (no RAG for general queries)
+            result = get_provider_response(user_id, prompt, use_rag=False)
 
             # Extract response components
             response_text = result.get("response", "")

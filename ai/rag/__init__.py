@@ -13,6 +13,7 @@ import logging
 from typing import List
 
 from .vector_store import get_vector_store
+from .rag_config import get_github_article_url
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +59,13 @@ def retrieve_context(query: str) -> dict:
         filename = source.split("/")[-1] if "/" in source else source
         context_parts.append(f"### Document {i}: {filename}\n{doc.page_content}")
 
-        # Add unique sources
+        # Add unique sources with GitHub URLs
         if filename not in seen_sources:
-            sources.append({"filename": filename})
+            github_url = get_github_article_url(filename)
+            sources.append({
+                "filename": filename,
+                "url": github_url
+            })
             seen_sources.add(filename)
 
     formatted_context = "\n\n".join(context_parts)

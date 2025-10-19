@@ -6,7 +6,6 @@ from slack_sdk import WebClient
 from ..listener_utils.listener_constants import RAG_LOADING_TEXT, ERROR_PREFIX
 from ..listener_utils.message_formatter import (
     format_rag_response,
-    format_ai_response,
     format_error_message,
 )
 
@@ -59,15 +58,27 @@ def incident_callback(
                 blocks=initial_blocks
             )
 
-            # Get AI response with incident response system prompt (includes RAG)
+            # Get AI response with incident response system prompt (enable RAG for incidents)
+            logger.info(f"Requesting incident response for user {user_id} with query: '{prompt[:100]}'")
+            logger.info("RAG is ENABLED for this request")
+
             result = get_provider_response(
-                user_id, prompt, context=[], system_content=INCIDENT_RESPONSE_SYSTEM_CONTENT
+                user_id, prompt, context=[], system_content=INCIDENT_RESPONSE_SYSTEM_CONTENT, use_rag=True
             )
 
             # Extract response components
             response_text = result.get("response", "")
             rag_sources = result.get("rag_sources", [])
             provider = result.get("provider", "")
+
+            # Log for debugging
+            logger.info(f"Incident response - Provider: {provider}, RAG sources: {len(rag_sources)}")
+            if rag_sources:
+                logger.info("RAG sources retrieved:")
+                for idx, source in enumerate(rag_sources, 1):
+                    logger.info(f"  {idx}. {source.get('filename', 'Unknown')}")
+            else:
+                logger.warning(f"⚠️  NO RAG SOURCES RETRIEVED for query: '{prompt}'")
 
             # Create blocks with prompt quote
             blocks = [
@@ -82,11 +93,15 @@ def incident_callback(
                 }
             ]
 
-            # Format with RAG citations if available
-            if rag_sources and provider.lower() == "anthropic":
+            # For /incident commands, ALWAYS use Knowledge Base formatting
+            # (RAG should be enabled, but use KB formatting regardless)
+            if len(rag_sources) > 0:
+                # RAG found sources - use Knowledge Base Resolution format with citations
                 response_blocks = format_rag_response(response_text, rag_sources, include_followup=False)
             else:
-                response_blocks = format_ai_response(response_text, response_type="general")
+                # No sources found, but still use Knowledge Base format (without citations)
+                logger.warning("No RAG sources found for incident query - using KB format anyway")
+                response_blocks = format_rag_response(response_text, sources=[], include_followup=False)
 
             blocks.extend(response_blocks)
 

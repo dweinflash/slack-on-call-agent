@@ -43,7 +43,7 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
 
         if text:
             waiting_message = say(text=DEFAULT_LOADING_TEXT, thread_ts=thread_ts)
-            result = get_provider_response(user_id, text, conversation_context)
+            result = get_provider_response(user_id, text, conversation_context, use_rag=False)
 
             # Extract response components
             response_text = result.get("response", "")

@@ -103,27 +103,38 @@ class AnthropicAPI(BaseAPIProvider):
         except Exception as e:
             logger.error(f"Error initializing MCP: {e}")
 
-    async def _generate_with_tools(self, prompt: str, system_content: str) -> dict:
+    async def _generate_with_tools(self, prompt: str, system_content: str, use_rag: bool = False) -> dict:
         """
         Generate response with MCP tool support and RAG context.
+
+        Args:
+            prompt: User's prompt/question
+            system_content: System prompt
+            use_rag: Whether to retrieve and use RAG knowledge base (default: False)
 
         Returns:
             Dictionary containing:
                 - 'response': The AI-generated response text
                 - 'rag_sources': List of source metadata dicts (empty if no RAG used)
         """
-        
+
         # Temporarily disable MCP tool support
         # await self._initialize_mcp()
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
 
-        # Retrieve relevant context from RAG system
-        logger.info(f"Retrieving RAG context for prompt: {prompt[:100]}...")
-        rag_result = retrieve_context(prompt)
-        rag_context = rag_result.get("context", "")
-        rag_sources = rag_result.get("sources", [])
-        logger.info(f"RAG context retrieved: {len(rag_context)} characters from {len(rag_sources)} sources")
+        # Conditionally retrieve RAG context based on use_rag flag
+        rag_context = ""
+        rag_sources = []
+
+        if use_rag:
+            logger.info(f"Retrieving RAG context for prompt: {prompt[:100]}...")
+            rag_result = retrieve_context(prompt)
+            rag_context = rag_result.get("context", "")
+            rag_sources = rag_result.get("sources", [])
+            logger.info(f"RAG context retrieved: {len(rag_context)} characters from {len(rag_sources)} sources")
+        else:
+            logger.info("RAG disabled for this query")
 
         # Inject RAG context into system prompt if available
         if rag_context:
@@ -202,9 +213,14 @@ Remember: Users need complete resolution guidance to fix production issues. Prov
             "rag_sources": rag_sources
         }
 
-    def generate_response(self, prompt: str, system_content: str) -> dict:
+    def generate_response(self, prompt: str, system_content: str, use_rag: bool = False) -> dict:
         """
         Generate a response to the user's prompt.
+
+        Args:
+            prompt: User's prompt/question
+            system_content: System prompt
+            use_rag: Whether to use RAG knowledge base retrieval (default: False)
 
         Returns:
             Dictionary containing:
@@ -216,7 +232,7 @@ Remember: Users need complete resolution guidance to fix production issues. Prov
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                return loop.run_until_complete(self._generate_with_tools(prompt, system_content))
+                return loop.run_until_complete(self._generate_with_tools(prompt, system_content, use_rag=use_rag))
             finally:
                 loop.close()
         except anthropic.APIConnectionError as e:
