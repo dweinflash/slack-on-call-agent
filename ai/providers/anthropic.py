@@ -150,19 +150,23 @@ The following knowledge base articles may be relevant to the user's query:
 
 When answering the user's question about incidents, alerts, or issues:
 1. **Prioritize information from the retrieved knowledge base articles above**
-2. **Provide detailed, actionable resolution steps** - this is critical for incident response
-3. **Structure your response clearly** using:
-   - Brief explanation of what the issue is
-   - Step-by-step resolution instructions with specific actions
-   - Common causes if relevant
-   - What to check/verify
-4. **Use formatting** to make steps easy to follow (bullet points, numbered lists)
-5. **Be comprehensive** - include all necessary details from the knowledge base
-6. **Be direct and technical** - assume the user needs to resolve the issue now
-7. If the knowledge base articles contain resolution steps, **include them in full**
-8. Use a professional, helpful tone appropriate for incident response
+2. **Keep your response BRIEF and HIGH-LEVEL** - do NOT reproduce detailed step-by-step instructions
+3. **Structure your response clearly**:
+   - Brief summary (2-3 sentences) of what the issue means
+   - High-level resolution approach (3-5 bullet points of main actions)
+   - Brief escalation guidance (1 sentence)
+4. **Use Slack's mrkdwn formatting** to make it scannable:
+   - Bold: *text* (single asterisks, NOT **text**)
+   - Italic: _text_
+   - Bullet points: • or -
+   - Code: `text`
+5. **Remind users** that detailed instructions, specific commands, and screenshots are available in the linked knowledge base articles
+6. **Be direct and professional** - assume the user needs quick guidance, not a full runbook reproduction
+7. **Target response length**: 500-1000 characters total
 
-Remember: Users need complete resolution guidance to fix production issues. Provide thorough, step-by-step instructions."""
+**CRITICAL FORMATTING**: This will be displayed in Slack. Use *single asterisks* for bold, NOT double. Slack's mrkdwn is different from standard markdown.
+
+Remember: The user will see links to the full knowledge base articles below your response. Your job is to provide a quick summary and high-level direction, NOT to reproduce the entire runbook. Keep it concise."""
             logger.info("Enhanced prompt with RAG context")
         else:
             logger.warning("No RAG context retrieved - responding without knowledge base")
