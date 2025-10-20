@@ -277,25 +277,6 @@ def format_ai_response(
     """
     blocks = []
 
-    # Choose header emoji based on type
-    emoji_map = {
-        "general": ":gear:",
-        "dm": ":busts_in_silhouette:",
-        "error": ":warning:"
-    }
-    emoji = emoji_map.get(response_type, ":gear:") if include_emoji else ""
-
-    # Header
-    header_text = f"{emoji} LVDS On-Call Agent" if emoji else "LVDS On-Call Agent"
-    blocks.append({
-        "type": "header",
-        "text": {
-            "type": "plain_text",
-            "text": header_text,
-            "emoji": True
-        }
-    })
-
     # Check if response needs shortening
     shortened_text, was_shortened = shorten_response(response_text, max_length=2500)
 
