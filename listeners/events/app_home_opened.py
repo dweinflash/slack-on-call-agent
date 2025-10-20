@@ -60,9 +60,17 @@ def app_home_opened_callback(event: dict, logger: Logger, client: WebClient):
                         "type": "header",
                         "text": {
                             "type": "plain_text",
-                            "text": "Welcome to Bolty's Home Page!",
+                            "text": "LVDS On-Call Agent",
                             "emoji": True,
                         },
+                    },
+                    {"type": "divider"},
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Professional technical support for LVDS application operations*\n\nI can help with:\n• Incident response and troubleshooting\n• Code analysis and system architecture\n• Software engineering questions\n\n*Available Commands:*\n• `/incident [description]` - Get resolution steps from knowledge base\n• `/code [question]` - Analyze codebase and system design\n• Mention me or DM for general technical support"
+                        }
                     },
                     {"type": "divider"},
                     {
@@ -73,7 +81,7 @@ def app_home_opened_callback(event: dict, logger: Logger, client: WebClient):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "Pick an option",
+                                        "text": "AI Provider Selection",
                                         "style": {"bold": True},
                                     }
                                 ],

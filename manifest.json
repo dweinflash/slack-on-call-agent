@@ -19,7 +19,7 @@
         "slash_commands": [
             {
                 "command": "/ask-bolty",
-                "description": "Interact with Bolty.",
+                "description": "Ask LVDS on-call agent for technical support",
                 "should_escape": false
             },
             {

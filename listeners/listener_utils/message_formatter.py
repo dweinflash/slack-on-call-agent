@@ -279,14 +279,14 @@ def format_ai_response(
 
     # Choose header emoji based on type
     emoji_map = {
-        "general": ":robot_face:",
-        "dm": ":speech_balloon:",
+        "general": ":gear:",
+        "dm": ":busts_in_silhouette:",
         "error": ":warning:"
     }
-    emoji = emoji_map.get(response_type, ":robot_face:") if include_emoji else ""
+    emoji = emoji_map.get(response_type, ":gear:") if include_emoji else ""
 
     # Header
-    header_text = f"{emoji} Bolty's Response" if emoji else "Bolty's Response"
+    header_text = f"{emoji} LVDS On-Call Agent" if emoji else "LVDS On-Call Agent"
     blocks.append({
         "type": "header",
         "text": {
