@@ -10,7 +10,7 @@ from ..listener_utils.message_formatter import (
 )
 
 """
-Callback for handling the 'ask-bolty' command. It acknowledges the command, retrieves the user's ID and prompt,
+Callback for handling the '/ask' command. It acknowledges the command, retrieves the user's ID and prompt,
 checks if the prompt is empty, and responds with either an error message or the provider's response.
 """
 

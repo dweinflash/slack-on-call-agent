@@ -5,6 +5,6 @@ from .incident_command import incident_callback
 
 
 def register(app: App):
-    app.command("/ask-bolty")(ask_callback)
+    app.command("/ask")(ask_callback)
     app.command("/code")(code_callback)
     app.command("/incident")(incident_callback)

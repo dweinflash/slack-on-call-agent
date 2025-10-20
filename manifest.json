@@ -18,8 +18,8 @@
         },
         "slash_commands": [
             {
-                "command": "/ask-bolty",
-                "description": "Ask LVDS on-call agent for technical support",
+                "command": "/ask",
+                "description": "Ask the on-call agent a general question",
                 "should_escape": false
             },
             {

@@ -69,7 +69,7 @@ def app_home_opened_callback(event: dict, logger: Logger, client: WebClient):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "*Professional technical support for LVDS application operations*\n\nI can help with:\n• Incident response and troubleshooting\n• Code analysis and system architecture\n• Software engineering questions\n\n*Available Commands:*\n• `/incident [description]` - Get resolution steps from knowledge base\n• `/code [question]` - Analyze codebase and system design\n• Mention me or DM for general technical support"
+                            "text": "*Professional technical support for LVDS application operations*\n\nI can help with:\n• Incident response and troubleshooting\n• Code analysis and system architecture\n• Software engineering questions\n\n*Available Commands:*\n• `/ask [question]` - Ask general technical questions\n• `/incident [description]` - Get resolution steps from knowledge base\n• `/code [question]` - Analyze codebase and system design\n• Mention me or DM for general technical support"
                         }
                     },
                     {"type": "divider"},
