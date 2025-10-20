@@ -36,6 +36,12 @@ Available tools: search_code, get_file_contents, list_files
 
 ## Response Format
 
+Use Slack mrkdwn formatting:
+- Bold: *text* (single asterisks)
+- Italic: _text_ (underscores)
+- Code: `text` or ```code block```
+- Lists: Use • or - for bullets
+
 Provide:
 - Brief summary
 - Code references with file paths
