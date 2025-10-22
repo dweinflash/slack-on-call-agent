@@ -50,7 +50,7 @@ To enable the `/code` command with GitHub repository access:
 ```bash
 # Generate a GitHub Personal Access Token at:
 # https://github.com/settings/tokens
-export GITHUB_TOKEN=ghp_your_github_token
+export GITHUB_TOKEN=your-github-token
 
 # Verify Node.js installation (v16 or higher required)
 node --version
@@ -60,7 +60,7 @@ node --version
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/dweinflash/slack-on-call-agent.git
 cd slack-on-call-agent
 
 # Create and activate virtual environment
@@ -152,7 +152,7 @@ User Request
 
 ## Technology Stack
 
-- **[Bolt for Python](https://slack.dev/bolt-python/)** - Slack application framework
+- **[Bolt for Python](https://docs.slack.dev/tools/bolt-python/)** - Slack application framework
 - **[LangChain](https://www.langchain.com/)** - RAG implementation
 - **[ChromaDB](https://www.trychroma.com/)** - Vector database for embeddings
 - **[Model Context Protocol](https://modelcontextprotocol.io/)** - Tool integration standard
