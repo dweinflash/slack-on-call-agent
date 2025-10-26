@@ -1,6 +1,6 @@
 # Slack On-Call Support Agent
 
-An AI-powered Slack bot designed to assist on-call teams with incident resolution and codebase analysis. The agent combines Retrieval-Augmented Generation (RAG) and Model Context Protocol (MCP) to provide intelligent, context-aware support.
+An agentic Slack bot designed to assist on-call teams with incident resolution and codebase analysis. The agent combines Retrieval-Augmented Generation (RAG) and Model Context Protocol (MCP) to provide intelligent, context-aware support.
 
 ## Overview
 
@@ -104,55 +104,3 @@ Handle general queries not covered by specialized commands:
 /ask what tools do you offer as an assistant
 /ask what is the primary purpose of the application
 ```
-
-### Mentions and Direct Messages
-
-Interact with the bot by mentioning it in any channel or sending direct messages:
-
-```
-@On-Call Agent can you help diagnose this error?
-```
-
-## Architecture
-
-```
-User Request
-    │
-    ├─► /incident  → RAG Knowledge Base (data/docs/)
-    │                   └─► Anthropic/OpenAI
-    │
-    ├─► /code      → MCP GitHub Tools (repository access)
-    │                   └─► Anthropic with tool integration
-    │
-    └─► /ask       → Direct AI Provider
-                        └─► Anthropic
-```
-
-## Key Features
-
-- **RAG Knowledge Base** - Indexes markdown documentation for incident resolution
-- **MCP Integration** - GitHub repository exploration via Model Context Protocol
-- **Conversation Context** - Maintains thread history for contextual responses
-
-## Documentation
-
-- [CLAUDE.md](./CLAUDE.md) - Architecture and development guide
-- [SETUP_MCP.md](./SETUP_MCP.md) - Detailed MCP configuration instructions
-- [manifest.json](./manifest.json) - Slack app configuration
-
-## Environment Variables
-
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `SLACK_BOT_TOKEN` | Yes | Bot authentication token |
-| `SLACK_APP_TOKEN` | Yes | Socket Mode connection token |
-| `ANTHROPIC_API_KEY` | Yes | Claude models with RAG/MCP support |
-| `OPENAI_API_KEY` | Yes | Embedding generation for knowledge base |
-| `GITHUB_TOKEN` | Yes | GitHub repository access via MCP |
-
-## Technology Stack
-
-- **[Bolt for Python](https://docs.slack.dev/tools/bolt-python/)** - Slack application framework
-- **[LangChain](https://www.langchain.com/)** - RAG implementation
-- **[ChromaDB](https://www.trychroma.com/)** - Vector database for embeddings
-- **[Model Context Protocol](https://modelcontextprotocol.io/)** - Tool integration standard
